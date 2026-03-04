@@ -44,9 +44,9 @@ I.e. for N-th challenge in the queue we use N to also reference:
 
 ## Model (model.lua)
 
-Model encapsulates queue object, supporting data objects (events/scores), and all logic of tracking events, timeouts, bonuses.
+Model represents game state. It encapsulates queue list, supporting data structures (per-challenge lists of scores or various events). Model is resposible for tracking events, timeouts, bonuses, and for game state transitions.
 
-Model exposes methods to initialize game state, register specific 'events', and to get the subset of queue corresponding to specific condition (e.g. all 'answerable' or all 'launchable' challenges)
+Model exposes methods to initialize game state, register specific 'events', and to get the subset of queue indeces corresponding to specific condition (e.g. referencing all 'answerable' or all 'launchable' challenges)
 
 ## View (graphics.lua)
 
