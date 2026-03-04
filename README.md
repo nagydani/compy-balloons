@@ -57,7 +57,7 @@ Screen is organized into three parts (beyond terminal)
 
 View functions are expected to be isolated from game state tracking. They are invoked with all required parameters (e.g. they know how to draw a challenge object with proper answer, but they do not bother qhere question and answer come from, or how proper answer was detected, or how desired  coordinates were calculated).
 
-Game also actively uses currying -- i.e. when specific challenge changes state (e.g. is devalued), controller (described below) invokes a factory function that accepts question and new bonus value, to generate the renderer function that draws this specific combination of question+bonus in predefined style (e.g. unanswered) while accepting coordinates as dynamic parameters. This allows to use returned renderer with changing coordinates, but without controller being further concerned about what exactly and how is being drawn by the renderer.
+View layer also actively uses parameterized functions generation. I.e. when specific challenge changes state (e.g. is devalued), controller (described below) invokes a factory function that accepts question text and new bonus value, to generate the renderer function that draws this specific combination of question+bonus in predefined style (e.g. unanswered) while accepting coordinates as dynamic parameters. This allows to use returned renderer with changing coordinates, but without controller being further concerned about what exactly and how exactly is being drawn by the renderer.
 
 ## Controller (main.lua)
 
