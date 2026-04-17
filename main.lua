@@ -40,7 +40,7 @@ function game_load()
   callbacks.draw = splash(WELCOME_MESSAGE)
   love.draw = callback("draw")
   love.update = callback("update")
-  love.singleclick = callback("click")
+  compy.singleclick = callback("click")
 end
 
 function game_over()
