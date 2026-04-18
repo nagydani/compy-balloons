@@ -1,200 +1,106 @@
 require("config")
 require("challenges")
-require("constants")
-require("model")
-require("graphics")
+require("stats")
+require("ui")
+require("helpers")
 require("debugfunc")
 
--- stylua: ignore start
-positions = { }
-render = {
-  score = nil,
-  progress = { },
-  challenges = { }
-}
+game_state = "loaded"
 
-callbacks = {
-  click = nil,
-  update = nil,
-  draw = nil
-}
--- stylua: ignore end
+function game_start()
+  local n = MAX_SLOTS
+  stats_reset(n)
+  challenges_reset(n)
 
-terminal = user_input()
+  ui_status_reset()
 
-function callback(name)
-  return function(...)
-    if callbacks[name] then
-      if love.DEBUG then
-        local c = callbacks[name]
-        local args = { ... }
-        safe_exec(c, unpack(args))
-      else
-        callbacks[name](...)
-      end
-    end
-  end
-end
-
-function game_load()
-  callbacks.click = game_start
-  callbacks.update = nil
-  callbacks.draw = splash(WELCOME_MESSAGE)
-  love.draw = callback("draw")
-  love.update = callback("update")
-  compy.singleclick = callback("click")
+  game_state = "active"
 end
 
 function game_over()
-  callbacks.update = nil
-  callbacks.click = game_start
-  reset_terminal("Click to restart")
-  local score, wins, total = get_game_results()
-  callbacks.draw = splashResults(score, wins, total)
+  ui_status_finalize()
+  game_state = "finished" -- stops updates, activates splash
 end
 
-function game_start()
-  reset_state()
-  reset_render()
-  ui_update_score()
-  callbacks.click = nil
-  callbacks.update = update_game
-  callbacks.draw = draw_game
-end
-
---- rendering ---
-
--- TODO: only works first time and after reading from terminal
-function reset_terminal(txt)
-  input_text(txt, nil)
-end
-
-function reset_render()
-  for i in queued_challenges() do
-    render.progress[i] = draw_pending_result
-    render.challenges[i] = nil
-  end
-  reset_terminal(STARTING_PROMPT)
-end
-
-function set_waiting_renderer(i)
-  local q = get_question(i)
-  local b = get_pending_bonus(i)
-  local r = unanswered_challenge_renderer(q, b)
-  render.challenges[i] = r
-end
-
-function set_solved_renderer(i)
-  local q, a = get_question_answer(i)
-  local b = get_earned_bonus(i)
-  local r = solved_challenge_renderer(q, a, b)
-  render.challenges[i] = r
-end
-
-function mark_as_launched(i)
-  render.progress[i] = draw_waiting_result
-end
-
-function mark_as_failed(i)
-  render.progress[i] = draw_failed_result
-end
-
-function mark_as_solved(i)
-  local b = get_earned_bonus(i)
-  render.progress[i] = successful_result_renderer(b)
-end
-
-function ui_update_score()
-  render.score = score_renderer(get_total_score())
-end
-
-function display_answer(txt)
-  local msg = fmt(GAME_PROMPT, txt)
-  reset_terminal(msg)
-end
-
---- rules ---
-
-function expire(i)
-  sfx.boom()
-  register_expire(i)
-  render.challenges[i] = nil
-  mark_as_failed(i)
-end
-
-function launch(i)
-  positions[i] = get_random_x()
-  register_launch(i)
-  set_waiting_renderer(i)
-  sfx.ping()
-  mark_as_launched(i)
-end
-
-function vanish(i)
-  register_vanish(i)
-  render.challenges[i] = nil
-end
-
-function devalue(i)
-  register_devalue(i)
-  set_waiting_renderer(i)
-end
-
-function win(i)
-  register_win(i)
-  sfx.wow()
-  set_solved_renderer(i)
-  mark_as_solved(i)
-  ui_update_score()
-  reset_terminal(STARTING_PROMPT)
-end
-
---- terminal ---
-
-function check_input()
-  if not terminal:is_empty() then
-    local txt = terminal()
-    display_answer(txt)
-    for_each(new_matches(txt), win)
+function game_status_update()
+  -- stats_settled() and game_over() or ui_status_update()
+  if stats_settled() then
+    game_over()
+  else
+    ui_status_update()
   end
 end
 
---- animation ---
+function game_update(dt)
+  local t_old = stats.time
+  local t_new = stats_add("time", dt)
+  local new_second = math.floor(t_old) < math.floor(t_new)
 
-function render_challenge(i)
-  local renderer = render.challenges[i]
-  if not renderer then
-    return
+  stats.changes = 0
+  challenges_update(t_new, stats_event_registrator)
+  if new_second or stats.changes > 0 then
+    game_status_update()
   end
-  local x = positions[i]
-  local y = field_height * current_progress(i)
-  renderer(x, y)
 end
 
---- main loops ---
+function game_validate_input(txt)
+  challenges_validate(txt, stats.time, stats_event_registrator)
+  ui_set_hint(fmt(GAME_PROMPT, txt), true)
+  game_status_update()
+end
 
-function update_game(dt)
-  time = time + dt
-  for_each(expirable(), expire)
-  for_each(vanishable(), vanish)
-  for_each(launchable(), launch)
-  for_each(devaluable(), devalue)
-  check_input()
-  if game_is_over() then
-    local last_flying = count(showing_off())
-    if 0 == last_flying then
-      game_over()
+game_commands = action_map({
+  start = game_start,
+  restart = game_start,
+}, ui_show_command_prompt)
+function game_command(txt)
+  game_commands[txt]()
+end
+
+on_tick = action_map({
+  active = game_update,
+})
+
+on_input = action_map({
+  active = game_validate_input,
+  loaded = game_command,
+  finished = game_command,
+})
+
+function game_state_router(map, debugname)
+  return function(...)
+    if debugname then
+      logdebug("DISPATCH[%s]: %s", debugname, game_state)
+    end
+    map[game_state](...)
+  end
+end
+
+hooks = action_map({})
+function hook(name)
+  return function(...)
+    if love.DEBUG then
+      safe_exec(hooks[name], ...)
+    else
+      hooks[name](...)
     end
   end
 end
 
-function draw_game()
-  render.score()
-  for i, result_card in ipairs(render.progress) do
-    result_card(i)
+function game_init()
+  challenges_init()
+
+  local state_updater = game_state_router(on_tick)
+  local input_handler = game_state_router(on_input)
+  hooks.update = function(...)
+    ui_read_input(input_handler)
+    state_updater(...)
   end
-  drawFieldBackground()
-  for_each(queued_challenges(), render_challenge)
+  hooks.draw = game_state_router(ui_renderers)
+
+  ui_show_command_prompt()
+  love.draw = hooks["draw"]
+  love.update = hook("update")
 end
 
-game_load()
+game_init()
