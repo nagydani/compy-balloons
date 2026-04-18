@@ -5,6 +5,7 @@ require("model")
 require("graphics")
 require("debugfunc")
 
+-- stylua: ignore start
 positions = { }
 render = {
   score = nil,
@@ -17,6 +18,7 @@ callbacks = {
   update = nil,
   draw = nil
 }
+-- stylua: ignore end
 
 terminal = user_input()
 
@@ -162,7 +164,7 @@ end
 function render_challenge(i)
   local renderer = render.challenges[i]
   if not renderer then
-    return 
+    return
   end
   local x = positions[i]
   local y = field_height * current_progress(i)
