@@ -21,3 +21,6 @@ COLORS.crimson = { 0.90, 0.22, 0.27 }
 COLORS.ruby = { 0.76, 0.07, 0.12 }
 COLORS.azure = { 0.20, 0.45, 0.85 }
 COLORS.denim = { 0.10, 0.25, 0.65 }
+COLORS.frost = { 1, 1, 1, 0.4 }
+COLORS.steel = { 0.6, 0.6, 0.6 }
+COLORS.flame = { 0.90, 0.22, 0.27 }

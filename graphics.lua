@@ -297,12 +297,11 @@ function widget_balloon(style, scale)
   local nubH = 0.4 * ry
   local strL = 0.5 * ry
 
-  local fill = style.fill_color or { 0.90, 0.22, 0.27, 1 }
-  local line = style.line_color or { 0.76, 0.07, 0.12, 1 }
+  local fill = style.fill_color or COLORS.flame
+  local line = style.line_color or COLORS.ruby
   local nub_c = style.nub_color or line
-  local str_c = style.str_color or { 0.6, 0.6, 0.6, 1 }
-  local hi_c = style.hi_color or { 1, 1, 1, 0.4 }
-  --local text = style.text
+  local str_c = style.str_color or COLORS.steel
+  local hi_c = style.hi_color or COLORS.frost
   local tc = STYLES.balloon_label.color
   local font = STYLES.balloon_label.font
 
