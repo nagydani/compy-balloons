@@ -290,10 +290,12 @@ end
 function widget_balloon(style, scale)
   local scale = scale or 1 -- need to pick from task
 
-  local rx, ry = 40 * scale, 40 * scale
-  local nubW = 10 * scale
-  local nubH = 16 * scale
-  local strL = 40 * scale
+  local BR = DEFAULT_BALLOON_RADIUS
+
+  local rx, ry = BR * scale, BR * scale
+  local nubW = 0.25 * ry
+  local nubH = 0.4 * ry
+  local strL = 0.5 * ry
 
   local fill = style.fill_color or { 0.90, 0.22, 0.27, 1 }
   local line = style.line_color or { 0.76, 0.07, 0.12, 1 }
