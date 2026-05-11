@@ -18,6 +18,7 @@ function game_start()
 end
 
 function game_over()
+  sfx.gameover()
   ui_status_finalize()
   game_state = "finished" -- stops updates, activates splash
 end

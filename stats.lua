@@ -44,14 +44,25 @@ stats_events = action_map({
     stats_add("visible")
     stats_add("pending", -1)
     stats_add("max_score", score)
+    sfx.ping()
+    --sfx.knock()
   end,
   solved = function(score)
     stats_add("wins")
     stats_add("score", score)
+    sfx.shot()
+    -- sfx.pew()
+    -- sfx.win()
+    -- sfx.wow()
+    -- sfx.shot()
+    -- sfx.correct()
   end,
   expired = function()
     stats_add("losses")
     stats_add("visible", -1)
+    sfx.boom()
+    -- sfx.wrong()
+    -- sfx.lose()
   end,
   cleared = function() -- post-win animation ended
     stats_add("visible", -1)
