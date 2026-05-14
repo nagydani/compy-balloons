@@ -1,12 +1,12 @@
 require("graphics")
 
 TASKS_CONFIG = {
-  { q = "C", r = "c" },
-  { q = "F", r = "f" },
-  { q = "G", r = "g" },
-  { q = "E", r = "e" },
-  { q = "U", r = "u" },
-  { q = "O", r = "o" },
+  { q = "C", a = "c" },
+  { q = "F", a = "f" },
+  { q = "G", a = "g" },
+  { q = "E", a = "e" },
+  { q = "U", a = "u" },
+  { q = "O", a = "o" },
   { q = "GIRAF.E", a = "f" },
   { q = "CA.ROT", a = "r" },
   { q = "ELEPH.NT", a = "a", style = "orange" },
